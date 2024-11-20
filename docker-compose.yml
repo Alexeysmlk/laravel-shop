@@ -1,0 +1,40 @@
+services:
+    web:
+        container_name: shop_nginx
+        image: nginx:latest
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www/html
+            - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf
+        links:
+            - fpm
+            - mysql
+    fpm:
+        container_name: shop_fpm
+        environment:
+            PHP_IDE_CONFIG: "serverName=server"
+        build:
+          dockerfile: docker/php/Dockerfile
+          context: .
+        volumes:
+            - ./:/var/www/html
+        links:
+            - mysql
+    mysql:
+        container_name: shop_db
+        image: mariadb:10.5.26
+        ports:
+            - "3306:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=laravel-shop
+    node:
+        container_name: shop_node
+        image: node:18
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+        ports:
+            - "5173:5173"
+        command: tail -f /dev/null
